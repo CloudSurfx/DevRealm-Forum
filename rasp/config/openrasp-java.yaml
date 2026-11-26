@@ -1,0 +1,201 @@
+# OpenRASP Configuration for Java Applications
+# Compatible with Tomcat, Spring Boot, JBoss, Jetty, WebLogic, WebSphere
+# Documentation: https://github.com/baidu/openrasp/blob/master/doc/setting.md
+
+# === Agent Settings ===
+app:
+  name: "devrealms-app"           # Application identifier
+  version: "1.0.0"                # Application version
+  env: "production"               # development, staging, production
+
+# === Global Protection Mode ===
+# log:    Monitor only, alert but don't block
+# block:  Block attacks and return block page
+global_action: "log"              # Start with "log" for baseline, switch to "block" after tuning
+
+# === Block Page Settings ===
+block:
+  status_code: 403                # HTTP status code for blocked requests
+  redirect_url: "/rasp/blocked"   # Custom block page URL (optional)
+  html: |
+    <!DOCTYPE html>
+    <html>
+    <head><title>Request Blocked by RASP</title></head>
+    <body>
+      <h1>Request Blocked</h1>
+      <p>This request was blocked by Runtime Application Self-Protection.</p>
+      <p>Reference ID: %{request_id}</p>
+    </body>
+    </html>
+
+# === Detection Plugin Configuration ===
+# Each plugin corresponds to an attack type
+# action: "log" (monitor) or "block" (prevent)
+# algorithm: detection algorithm ("default", "strict", "loose")
+
+plugin:
+  timeout: 100                    # Plugin execution timeout (ms)
+  maxstack: 100                   # Max stack frames to capture for attack context
+
+  # SQL Injection Detection
+  sql_injection:
+    enabled: true
+    action: "block"
+    algorithm: "default"
+    config:
+      # Detect: union, select/insert/update/delete/drop/alter, from/into/table/set patterns
+      # Also detects: blind SQLi, stacked queries, comment evasion
+      whitelist: []               # Add safe query patterns here if needed
+
+  # Command Injection Detection
+  command_injection:
+    enabled: true
+    action: "block"
+    algorithm: "strict"
+    config:
+      # Detects: ; & | $() `` || && newlines in command arguments
+      # Also detects: argument injection, environment variable manipulation
+      dangerous_commands: ["rm", "cat", "ls", "wget", "curl", "nc", "bash", "sh", "powershell", "cmd"]
+
+  # SSRF Detection
+  ssrf:
+    enabled: true
+    action: "block"
+    algorithm: "default"
+    config:
+      # Blocks requests to internal IPs: 10.x, 172.16-31.x, 192.168.x, 127.x, 169.254.x
+      # Also blocks: metadata endpoints (169.254.169.254), localhost, private hostnames
+      allowed_domains: []         # Add trusted external domains here
+      allowed_ips: []             # Add trusted internal IPs here
+
+  # Path Traversal Detection
+  path_traversal:
+    enabled: true
+    action: "block"
+    algorithm: "default"
+    config:
+      # Detects: ../ ..\ URL encoding, double encoding, null bytes
+      # Also detects: absolute paths, symlink traversal
+      allowed_paths: ["/var/www/uploads", "/tmp/app-uploads"]
+
+  # XXE Detection
+  xxe:
+    enabled: true
+    action: "block"
+    algorithm: "strict"
+    config:
+      # Blocks: DOCTYPE declarations, external entities, parameter entities
+      # Also detects: billion laughs, quadratic blowup
+      allow_dtd: false
+
+  # Insecure Deserialization Detection
+  deserialization:
+    enabled: true
+    action: "block"
+    algorithm: "default"
+    config:
+      # Detects: Java deserialization gadgets (CommonsCollections, Spring, etc.)
+      # Also detects: JSON/YAML deserialization attacks
+      blocked_classes: [
+        "org.apache.commons.collections.functors.*",
+        "org.springframework.beans.factory.*",
+        "com.sun.rowset.*",
+        "javax.management.*"
+      ]
+
+  # XSS Detection (Reflected)
+  xss:
+    enabled: true
+    action: "log"                 # Usually monitor-only to avoid breaking apps
+    algorithm: "default"
+    config:
+      # Detects: script tags, event handlers, javascript: URLs in response body
+      # Context-aware: HTML, JavaScript, CSS, URL contexts
+      html_sanitization: true
+
+  # LDAP Injection Detection
+  ldap_injection:
+    enabled: true
+    action: "block"
+    algorithm: "default"
+    config:
+      # Detects: * ) ( & | = special chars in LDAP filters
+      # Also detects: wildcard expansion, filter manipulation
+      escape_wildcards: true
+
+  # Remote Code Execution Detection
+  rce:
+    enabled: true
+    action: "block"
+    algorithm: "strict"
+    config:
+      # Detects: eval, exec, compile, Runtime.exec, ProcessBuilder
+      # Also detects: script engine abuse (Nashorn, Rhino, Groovy)
+      blocked_methods: ["eval", "exec", "compile", "load", "defineClass"]
+
+  # File Upload Detection
+  file_upload:
+    enabled: true
+    action: "block"
+    algorithm: "default"
+    config:
+      # Detects: malicious file types, polyglots, double extensions
+      # Also checks: MIME type vs extension mismatch
+      allowed_extensions: [".jpg", ".jpeg", ".png", ".gif", ".pdf", ".txt"]
+      max_size_mb: 10
+
+  # Reflection Attack Detection
+  reflection:
+    enabled: true
+    action: "log"
+    algorithm: "default"
+    config:
+      # Detects: setAccessible, Class.forName, Method.invoke abuse
+      blocked_packages: ["java.lang.reflect", "sun.misc", "com.sun"]
+
+# === Logging Configuration ===
+log:
+  maxstack: 50                    # Stack frames in attack logs
+  maxbody: 4096                   # Max request body size to log (bytes)
+  format: "json"                  # json or text
+  level: "info"                   # debug, info, warn, error
+
+  # Syslog Forwarding (for SIEM integration)
+  syslog:
+    enable: true
+    url: "udp://localhost:514"    # Change to your SIEM endpoint
+    tag: "openrasp"
+    facility: "local0"
+    format: "json"
+
+  # HTTP Webhook Forwarding (alternative to syslog)
+  webhook:
+    enable: false
+    url: "https://siem.example.com/hec"
+    token: ""                     # Splunk HEC token or similar
+    batch_size: 100
+    flush_interval_ms: 5000
+
+# === Performance Settings ===
+performance:
+  cpu_limit_percent: 5            # Max CPU usage by RASP agent (%)
+  memory_limit_mb: 128            # Max memory usage (MB)
+  sampling_rate: 1.0              # Request sampling rate (0.0-1.0)
+
+# === Cloud/Container Settings ===
+cloud:
+  kubernetes: false               # Set true if running in K8s
+  container_id: ""                # Auto-detected in containers
+  pod_name: ""                    # Auto-detected in K8s
+  namespace: ""                   # Auto-detected in K8s
+
+# === Management API ===
+management:
+  enabled: true
+  port: 8081                      # Management port (different from app port)
+  host: "127.0.0.1"               # Bind to localhost only
+  endpoints:
+    - "/rasp/status"              # Agent status
+    - "/rasp/config"              # Current config
+    - "/rasp/stats"               # Detection statistics
+    - "/rasp/health"              # Health check

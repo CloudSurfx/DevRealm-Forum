@@ -1,0 +1,6 @@
+{
+  "name": "Forum",
+  "description": "Nederlands communityforum met live chat, discussies, nieuws en actieve leden.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

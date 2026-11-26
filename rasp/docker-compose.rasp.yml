@@ -1,0 +1,133 @@
+# Docker Compose for RASP-enabled Application Stack
+# Usage: docker-compose -f docker-compose.rasp.yml up -d
+
+version: '3.8'
+
+services:
+  # Java Application with OpenRASP
+  app-java:
+    image: openjdk:17-jdk-slim
+    container_name: devrealms-java-rasp
+    volumes:
+      - ./rasp/config/openrasp-java.yaml:/opt/rasp/rasp.yaml:ro
+      - ./rasp/scripts/rasp_audit.py:/opt/rasp/rasp_audit.py:ro
+      - ./target/app.jar:/app/app.jar:ro  # Build your Spring Boot JAR first
+    environment:
+      - CATALINA_OPTS=-javaagent:/opt/rasp/rasp.jar
+      - RASP_CONFIG=/opt/rasp/rasp.yaml
+      - JAVA_OPTS=-Xms512m -Xmx1g
+    ports:
+      - "8080:8080"   # Application port
+      - "8081:8081"   # RASP management port
+    command: >
+      sh -c "
+        wget -q https://github.com/baidu/openrasp/releases/download/1.3.6/rasp-1.3.6.jar -O /opt/rasp/rasp.jar &&
+        java -javaagent:/opt/rasp/rasp.jar -jar /app/app.jar
+      "
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/rasp/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Python Flask Application with RASP Middleware
+  app-python:
+    build:
+      context: .
+      dockerfile: Dockerfile.rasp-python
+    container_name: devrealms-python-rasp
+    volumes:
+      - ./rasp/config/openrasp-python.yaml:/etc/rasp/config.yaml:ro
+      - ./rasp/examples/flask_rasp_middleware.py:/app/app.py:ro
+    environment:
+      - RASP_CONFIG=/etc/rasp/config.yaml
+      - FLASK_ENV=production
+    ports:
+      - "5000:5000"   # Application port
+      - "8082:8081"   # RASP management port
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/rasp/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # SIEM - Elasticsearch for log aggregation
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: devrealms-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # SIEM - Logstash for parsing RASP logs
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.11.0
+    container_name: devrealms-logstash
+    volumes:
+      - ./rasp/logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./rasp/logs:/var/log/rasp:ro
+    ports:
+      - "5044:5044"   # Beats input
+      - "5140:5140/udp"  # Syslog input
+      - "9600:9600"   # Monitoring API
+    environment:
+      - LS_JAVA_OPTS=-Xms512m -Xmx512m
+    depends_on:
+      - elasticsearch
+
+  # SIEM - Kibana for visualization
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: devrealms-kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+
+  # Audit Runner - Periodic RASP security audits
+  rasp-audit:
+    build:
+      context: .
+      dockerfile: Dockerfile.rasp-audit
+    container_name: devrealms-rasp-audit
+    volumes:
+      - ./rasp/config:/config:ro
+      - ./rasp/logs:/logs:ro
+      - ./rasp/reports:/reports
+    environment:
+      - AUDIT_INTERVAL_HOURS=24
+      - CONFIG_FILE=/config/detection-plugins.json
+      - LOG_FILE=/logs/attack-sample.jsonl
+      - OUTPUT_DIR=/reports
+    command: >
+      sh -c "
+        while true; do
+          python /app/rasp_audit.py --config $$CONFIG_FILE --attack-log $$LOG_FILE --output $$OUTPUT_DIR/audit-$$(date +%Y%m%d-%H%M%S).json;
+          sleep $$((AUDIT_INTERVAL_HOURS * 3600));
+        done
+      "
+    depends_on:
+      - app-java
+      - app-python
+
+volumes:
+  elasticsearch_data:
+
+networks:
+  default:
+    name: devrealms-rasp-network

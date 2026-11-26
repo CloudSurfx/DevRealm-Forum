@@ -1,0 +1,107 @@
+{
+  "index_patterns": ["rasp-logs-*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "refresh_interval": "5s",
+      "mapping": {
+        "total_fields": {
+          "limit": 2000
+        }
+      }
+    },
+    "mappings": {
+      "dynamic_templates": [
+        {
+          "attack_params": {
+            "path_match": "attack_param_*",
+            "mapping": {
+              "type": "keyword",
+              "ignore_above": 1024
+            }
+          }
+        }
+      ],
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "timestamp": {
+          "type": "date"
+        },
+        "rasp_agent": {
+          "type": "keyword"
+        },
+        "agent_version": {
+          "type": "keyword"
+        },
+        "attack_type": {
+          "type": "keyword"
+        },
+        "action_taken": {
+          "type": "keyword"
+        },
+        "attack_severity": {
+          "type": "keyword"
+        },
+        "client_ip": {
+          "type": "ip"
+        },
+        "request_url": {
+          "type": "keyword",
+          "ignore_above": 2048
+        },
+        "request_method": {
+          "type": "keyword"
+        },
+        "plugin_name": {
+          "type": "keyword"
+        },
+        "request_id": {
+          "type": "keyword"
+        },
+        "matched_pattern": {
+          "type": "keyword",
+          "ignore_above": 1024
+        },
+        "context": {
+          "type": "keyword"
+        },
+        "attack_value": {
+          "type": "keyword",
+          "ignore_above": 2048
+        },
+        "stack_trace": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 2048
+            }
+          }
+        },
+        "java_class": {
+          "type": "keyword"
+        },
+        "java_method": {
+          "type": "keyword"
+        },
+        "java_file": {
+          "type": "keyword"
+        },
+        "java_line": {
+          "type": "integer"
+        },
+        "geoip": {
+          "properties": {
+            "city_name": { "type": "keyword" },
+            "country_iso_code": { "type": "keyword" },
+            "location": { "type": "geo_point" },
+            "region_name": { "type": "keyword" }
+          }
+        }
+      }
+    }
+  }
+}

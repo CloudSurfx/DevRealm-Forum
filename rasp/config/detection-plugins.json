@@ -1,0 +1,79 @@
+{
+  "agent_type": "openrasp",
+  "agent_version": "1.3.6",
+  "global_action": "log",
+  "cpu_limit_percent": 5,
+  "siem_integration": {
+    "enabled": true,
+    "type": "syslog",
+    "endpoint": "udp://localhost:514"
+  },
+  "detection_plugins": {
+    "sqli": {
+      "enabled": true,
+      "action": "block",
+      "algorithm": "default",
+      "hook": "sql_query"
+    },
+    "cmdi": {
+      "enabled": true,
+      "action": "block",
+      "algorithm": "strict",
+      "hook": "command_exec"
+    },
+    "ssrf": {
+      "enabled": true,
+      "action": "block",
+      "algorithm": "default",
+      "hook": "http_request"
+    },
+    "path_traversal": {
+      "enabled": true,
+      "action": "block",
+      "algorithm": "default",
+      "hook": "file_open"
+    },
+    "xxe": {
+      "enabled": true,
+      "action": "block",
+      "algorithm": "strict",
+      "hook": "xml_parse"
+    },
+    "deserialization": {
+      "enabled": true,
+      "action": "block",
+      "algorithm": "default",
+      "hook": "deserialize"
+    },
+    "xss": {
+      "enabled": true,
+      "action": "log",
+      "algorithm": "default",
+      "hook": "response_write"
+    },
+    "ldap_injection": {
+      "enabled": true,
+      "action": "block",
+      "algorithm": "default",
+      "hook": "ldap_query"
+    },
+    "rce": {
+      "enabled": true,
+      "action": "block",
+      "algorithm": "strict",
+      "hook": "code_eval"
+    },
+    "file_upload": {
+      "enabled": true,
+      "action": "block",
+      "algorithm": "default",
+      "hook": "file_upload"
+    },
+    "reflection": {
+      "enabled": true,
+      "action": "log",
+      "algorithm": "default",
+      "hook": "reflection"
+    }
+  }
+}

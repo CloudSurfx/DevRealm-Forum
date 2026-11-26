@@ -1,0 +1,16 @@
+# Start de forum-frontend met: docker compose up -d --build
+# Daarna staat de site op http://localhost:8080
+#
+# Docker Compose leest automatisch het bestand .env in deze map
+# en vult de ${...}-waarden hieronder in.
+services:
+  forum:
+    build:
+      context: .
+      args:
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
+        VITE_DONATE_URL: ${VITE_DONATE_URL:-}
+    ports:
+      - "8080:80"
+    restart: unless-stopped

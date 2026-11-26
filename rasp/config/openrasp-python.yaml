@@ -1,0 +1,220 @@
+# Python RASP Configuration
+# For Flask, Django, FastAPI, Starlette applications
+# This is a configuration template - implementation requires RASP middleware/library
+
+app:
+  name: "devrealms-python-api"
+  version: "1.0.0"
+  env: "production"
+
+# Global protection mode: "log" (monitor) or "block" (prevent)
+global_action: "log"
+
+# Block response settings
+block:
+  status_code: 403
+  response:
+    error: "RASP_BLOCKED"
+    message: "Request blocked by Runtime Application Self-Protection"
+    request_id: "%{request_id}"
+
+# Detection plugins for Python
+plugins:
+  sql_injection:
+    enabled: true
+    action: "block"
+    patterns:
+      - "(?i)\\b(union\\s+select|insert\\s+into|update\\s+\\w+\\s+set|delete\\s+from|drop\\s+table|alter\\s+table)\\b"
+      - "(?i)('|\\\"|;|--|/\\*|\\*/|\\bor\\b|\\band\\b)\\s*[=<>]"
+      - "(?i)(exec|execute|sp_|xp_)\\s*\\("
+    context: ["query_params", "form_data", "json_body", "headers"]
+    whitelist: []  # Add safe patterns here
+
+  command_injection:
+    enabled: true
+    action: "block"
+    patterns:
+      - "[;&|$`]\\s*\\w+"
+      - "\\$\\{.*\\}"
+      - "`.*`"
+      - "\\|\\|"
+      - "&&"
+    dangerous_commands:
+      - "rm"
+      - "cat"
+      - "ls"
+      - "wget"
+      - "curl"
+      - "nc"
+      - "netcat"
+      - "bash"
+      - "sh"
+      - "python"
+      - "perl"
+      - "powershell"
+      - "cmd"
+    context: ["query_params", "form_data", "json_body", "headers"]
+
+  ssrf:
+    enabled: true
+    action: "block"
+    blocked_patterns:
+      - "^http://127\\."
+      - "^http://localhost"
+      - "^http://169\\.254\\."
+      - "^http://10\\."
+      - "^http://172\\.(1[6-9]|2[0-9]|3[0-1])\\."
+      - "^http://192\\.168\\."
+      - "^http://\\[::1\\]"
+      - "^http://\\[fe80::"
+    allowed_domains: []
+    context: ["query_params", "form_data", "json_body", "headers"]
+
+  path_traversal:
+    enabled: true
+    action: "block"
+    patterns:
+      - "\\.\\./"
+      - "\\.\\.\\\\"
+      - "%2e%2e%2f"
+      - "%2e%2e%5c"
+      - "..%2f"
+      - "..%5c"
+      - "%252e%252e%252f"
+    context: ["query_params", "form_data", "json_body", "path_params"]
+    allowed_paths:
+      - "/var/www/uploads"
+      - "/tmp/app-uploads"
+
+  xxe:
+    enabled: true
+    action: "block"
+    # For XML parsing libraries (lxml, defusedxml, xml.etree)
+    settings:
+      forbid_dtd: true
+      forbid_entities: true
+      forbid_external: true
+    context: ["xml_body", "soap_body"]
+
+  deserialization:
+    enabled: true
+    action: "block"
+    # For pickle, yaml, json.loads with object_hook, marshal, shelve
+    blocked_modules:
+      - "pickle"
+      - "marshal"
+      - "shelve"
+      - "yaml.unsafe_load"
+    allowed_modules:
+      - "json"
+      - "yaml.safe_load"
+    context: ["json_body", "form_data", "cookies"]
+
+  xss:
+    enabled: true
+    action: "log"  # Usually monitor for reflected XSS
+    patterns:
+      - "(?i)<script[^>]*>.*?</script>"
+      - "(?i)on\\w+\\s*="
+      - "(?i)javascript:"
+      - "(?i)data:text/html"
+      - "(?i)vbscript:"
+      - "(?i)expression\\s*\\("
+    context: ["query_params", "form_data", "json_body", "headers", "response_body"]
+
+  ldap_injection:
+    enabled: true
+    action: "block"
+    patterns:
+      - "[*()&|=!]"
+      - "\\\\2a|\\\\28|\\\\29|\\\\26|\\\\7c|\\\\3d|\\\\21"
+    context: ["query_params", "form_data", "json_body"]
+
+  rce:
+    enabled: true
+    action: "block"
+    patterns:
+      - "(?i)\\b(eval|exec|compile|__import__)\\s*\\("
+      - "(?i)subprocess\\.(run|Popen|call|check_output)"
+      - "(?i)os\\.(system|popen|spawn|exec)"
+      - "(?i)code\\.InteractiveConsole"
+      - "(?i)ast\\.literal_eval"
+    context: ["query_params", "form_data", "json_body"]
+
+  file_upload:
+    enabled: true
+    action: "block"
+    allowed_extensions:
+      - ".jpg"
+      - ".jpeg"
+      - ".png"
+      - ".gif"
+      - ".pdf"
+      - ".txt"
+      - ".csv"
+    max_size_mb: 10
+    check_mime: true
+    quarantine_dir: "/var/quarantine/uploads"
+
+# Logging configuration
+logging:
+  level: "INFO"
+  format: "json"
+  max_body_size: 4096
+  include_stack: true
+  stack_frames: 50
+
+  # Syslog for SIEM
+  syslog:
+    enabled: true
+    host: "localhost"
+    port: 514
+    protocol: "udp"
+    tag: "python-rasp"
+    facility: "local0"
+
+  # HTTP Webhook for SIEM
+  webhook:
+    enabled: false
+    url: "https://siem.example.com/hec"
+    headers:
+      Authorization: "Splunk %{token}"
+    batch_size: 100
+    flush_interval: 5
+
+# Performance limits
+performance:
+  cpu_percent: 5
+  memory_mb: 128
+  request_timeout_ms: 5000
+
+# Middleware integration examples
+middleware:
+  flask:
+    enabled: true
+    before_request: true
+    after_request: true
+    teardown_request: true
+
+  django:
+    enabled: true
+    middleware_class: "rasp.middleware.RASPMiddleware"
+
+  fastapi:
+    enabled: true
+    middleware_class: "rasp.middleware.FastAPIRASPMiddleware"
+
+  starlette:
+    enabled: true
+    middleware_class: "rasp.middleware.StarletteRASPMiddleware"
+
+# Management endpoints
+management:
+  enabled: true
+  host: "127.0.0.1"
+  port: 8081
+  endpoints:
+    - "/rasp/status"
+    - "/rasp/config"
+    - "/rasp/stats"
+    - "/rasp/health"

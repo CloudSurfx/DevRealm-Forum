@@ -1,0 +1,1052 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Redesign - "Creative Forge" theme for a maker community
+   Distinctive palette: deep indigo base, warm gold primary, bright cyan secondary */
+@theme {
+  --radius-xl: 0.5rem;
+  --radius-2xl: 0.6875rem;
+  --color-forge-gold: #fbbf24;
+  --color-forge-gold-hover: #fcd34d;
+  --color-forge-cyan: #06b6d4;
+  --color-forge-cyan-hover: #22d3ee;
+  --color-forge-base: #0d0c11;
+  --color-forge-surface: #18161f;
+  --color-forge-elevated: #201e2a;
+  --color-forge-nav: #14121a;
+
+  /* Semantic mappings for existing violet classes */
+  --color-violet-50: color-mix(in srgb, var(--forum-accent) 7%, white);
+  --color-violet-100: color-mix(in srgb, var(--forum-accent) 14%, white);
+  --color-violet-200: color-mix(in srgb, var(--forum-accent) 28%, white);
+  --color-violet-300: color-mix(in srgb, var(--forum-accent) 50%, white);
+  --color-violet-400: var(--forum-accent-hover);
+  --color-violet-500: var(--forum-accent);
+  --color-violet-600: color-mix(in srgb, var(--forum-accent) 88%, black);
+  --color-violet-700: color-mix(in srgb, var(--forum-accent) 72%, black);
+  --color-violet-800: color-mix(in srgb, var(--forum-accent) 55%, black);
+  --color-violet-900: color-mix(in srgb, var(--forum-accent) 40%, black);
+  --color-violet-950: color-mix(in srgb, var(--forum-accent) 25%, black);
+}
+
+@property --forum-accent {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #fbbf24;
+}
+
+@property --forum-accent-hover {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #fcd34d;
+}
+
+@property --forum-accent-2 {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #06b6d4;
+}
+
+@property --forum-bg-dark {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #0d0c11;
+}
+
+@property --forum-nav-dark {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #14121a;
+}
+
+@property --forum-surface-dark {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #18161f;
+}
+
+@property --forum-elevated-dark {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #201e2a;
+}
+
+@layer base {
+  :root {
+    /* Inter voor koppen én tekst: rustig en strak, koppen groot en semi-bold */
+    --font-display: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+    /* Eigen, apart lettertype-duo voor de board-index/forum-stijl */
+    --font-board-display: 'Bricolage Grotesque', 'Outfit', system-ui, sans-serif;
+    --font-board-mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+    /* Creative Forge palette — warm gold primary, bright cyan secondary, deep indigo base */
+    --forum-accent: #fbbf24;
+    --forum-accent-hover: #fcd34d;
+    --forum-accent-rgb: 251, 191, 36;
+    /* Tweede kleur van het verloop: themakleur → helder cyaan */
+    --forum-accent-2: #06b6d4;
+    --forum-accent-2-rgb: 6, 182, 212;
+    --forum-bg-dark: #0d0c11;
+    --forum-nav-dark: #14121a;
+    --forum-surface-dark: #18161f;
+    --forum-elevated-dark: #201e2a;
+    --forum-glow-alpha-primary: 0.22;
+    --forum-glow-alpha-secondary: 0.06;
+    --forum-hero-alpha: 0.15;
+    --forum-theme-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --forum-theme-duration: 360ms;
+    transition:
+      --forum-accent var(--forum-theme-duration) var(--forum-theme-ease),
+      --forum-accent-hover var(--forum-theme-duration) var(--forum-theme-ease),
+      --forum-accent-2 var(--forum-theme-duration) var(--forum-theme-ease),
+      --forum-bg-dark var(--forum-theme-duration) var(--forum-theme-ease),
+      --forum-nav-dark var(--forum-theme-duration) var(--forum-theme-ease),
+      --forum-surface-dark var(--forum-theme-duration) var(--forum-theme-ease),
+      --forum-elevated-dark var(--forum-theme-duration) var(--forum-theme-ease);
+  }
+
+  html {
+    font-family: var(--font-sans);
+    font-feature-settings: 'cv11', 'ss01';
+    letter-spacing: 0.005em;
+    scroll-behavior: smooth;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.015em;
+  }
+
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+}
+
+/* Smooth theme transition across interactive elements, cards, and sidebars */
+:where(
+  body,
+  aside,
+  header,
+  nav,
+  main,
+  section,
+  article,
+  footer,
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  label,
+  span,
+  div[class*="rounded-"],
+  div[class*="border-"],
+  div[class*="bg-"],
+  .forum-card-glow,
+  .forum-hero-glow
+) {
+  transition-property:
+    background-color,
+    border-color,
+    color,
+    fill,
+    stroke,
+    box-shadow,
+    outline-color,
+    opacity,
+    transform;
+  transition-duration: 320ms;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Smooth rising bar animation for poll results */
+.poll-result-bar {
+  transition:
+    width 680ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: width;
+}
+
+/* Custom subtle scrollbars matching the active theme accent */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--forum-accent) 28%, transparent);
+  border-radius: 9999px;
+  transition: background-color 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--forum-accent) 45%, transparent);
+}
+
+/* ===========================================================================
+   Board-index: eigen uiterlijk voor de categorie-/boardweergave, los van de
+   rest van de site. Warm gold + cyan op diep indigo, Bricolage Grotesque / IBM Plex.
+   =========================================================================== */
+:root {
+  --board-hero: #1a1620;
+  --board-hero-ink: #fef3c7;
+  --board-hero-muted: #fbbf24;
+  --board-coral: #06b6d4;
+}
+.dark {
+  --board-hero: #1a1620;
+  --board-hero-ink: #fef3c7;
+  --board-hero-muted: #fbbf24;
+  --board-coral: #22d3ee;
+}
+
+.board-hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--board-hero);
+  color: var(--board-hero-ink);
+  border-radius: 1rem;
+  font-family: var(--font-board-display);
+}
+.board-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(ellipse 70% 90% at 90% 0%, #000, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 90% at 90% 0%, #000, transparent 75%);
+}
+.board-hero::after {
+  content: '';
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  right: -110px;
+  top: -140px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--board-coral) 45%, transparent), transparent);
+}
+.board-hero > * {
+  position: relative;
+  z-index: 1;
+}
+.board-kicker {
+  font-family: var(--font-board-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--board-hero-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.board-kicker::before {
+  content: '';
+  width: 18px;
+  height: 2px;
+  background: var(--board-coral);
+  border-radius: 2px;
+}
+.board-stat dt {
+  font-family: var(--font-board-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--board-hero-muted);
+}
+.board-stat dd {
+  font-family: var(--font-board-display);
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  margin: 2px 0 0;
+}
+
+.board-tile {
+  position: relative;
+  border-radius: 0.875rem;
+  transition: background-color 150ms, border-color 150ms;
+  border: 1px solid transparent;
+}
+.board-tile::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--k, var(--board-coral));
+  transform: scaleY(0);
+  transition: transform 180ms;
+}
+.board-tile:hover::before {
+  transform: scaleY(1);
+}
+.board-tile:hover {
+  background: color-mix(in srgb, var(--k, var(--board-coral)) 8%, transparent);
+}
+.board-tile[data-active='true'] {
+  background: color-mix(in srgb, var(--k, var(--board-coral)) 12%, transparent);
+  border-color: color-mix(in srgb, var(--k, var(--board-coral)) 35%, transparent);
+}
+.board-tile-icon {
+  color: var(--k, var(--board-coral));
+  background: color-mix(in srgb, var(--k, var(--board-coral)) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--k, var(--board-coral)) 30%, transparent);
+}
+.board-tile-name {
+  font-family: var(--font-board-display);
+}
+
+/* Zachte gloed: bewust uitgezet voor een rustiger, menselijker uiterlijk.
+   (Oude stijl staat hieronder onder .forum-card-glow--legacy) */
+.forum-card-glow,
+.forum-hero-glow,
+.dark .forum-hero-glow--legacy {
+  background-image: none !important;
+}
+
+.forum-card-glow--legacy {
+  background-image: radial-gradient(
+    circle at 86% 88%,
+    color-mix(in srgb, var(--forum-accent) calc(var(--forum-glow-alpha-primary) * 100%), transparent) 0%,
+    color-mix(in srgb, var(--forum-accent) calc(var(--forum-glow-alpha-secondary) * 100%), transparent) 38%,
+    transparent 70%
+  );
+}
+
+.dark .forum-hero-glow {
+  background-image:
+    radial-gradient(
+      circle at 92% 15%,
+      color-mix(in srgb, var(--forum-accent) calc(var(--forum-hero-alpha) * 100%), transparent) 0%,
+      transparent 48%
+    ),
+    radial-gradient(circle at 12% 90%, color-mix(in srgb, var(--forum-accent-2) 12%, transparent) 0%, transparent 45%),
+    radial-gradient(circle at 55% 110%, color-mix(in srgb, var(--forum-accent-2) 6%, transparent) 0%, transparent 50%);
+}
+
+.forum-hero-glow--legacy {
+  background-image:
+    radial-gradient(
+      circle at 92% 15%,
+      color-mix(in srgb, var(--forum-accent) 12%, transparent) 0%,
+      transparent 48%
+    ),
+    radial-gradient(circle at 12% 90%, color-mix(in srgb, var(--forum-accent-2) 10%, transparent) 0%, transparent 45%);
+}
+
+/* Global theme engine bindings so all accents & dark surfaces follow the active theme */
+.bg-\[\#a88bfa\] {
+  background-color: var(--forum-accent) !important;
+}
+
+.hover\:bg-\[\#b79dff\]:hover {
+  background-color: var(--forum-accent-hover) !important;
+}
+
+.text-\[\#a88bfa\] {
+  color: var(--forum-accent) !important;
+}
+
+.dark .dark\:text-\[\#a88bfa\],
+.dark .dark\:group-hover\:text-\[\#a88bfa\]:is(:where(.group):hover *) {
+  color: var(--forum-accent) !important;
+}
+
+.bg-\[\#a88bfa\]\/15 {
+  background-color: color-mix(in srgb, var(--forum-accent) 15%, transparent) !important;
+}
+
+.bg-\[\#a88bfa\]\/18 {
+  background-color: color-mix(in srgb, var(--forum-accent) 18%, transparent) !important;
+}
+
+.bg-\[\#a88bfa\]\/20 {
+  background-color: color-mix(in srgb, var(--forum-accent) 20%, transparent) !important;
+}
+
+.border-\[\#a88bfa\]\/40 {
+  border-color: color-mix(in srgb, var(--forum-accent) 40%, transparent) !important;
+}
+
+.border-\[\#a88bfa\]\/50 {
+  border-color: color-mix(in srgb, var(--forum-accent) 50%, transparent) !important;
+}
+
+.dark .dark\:bg-\[\#0b0a12\] {
+  background-color: var(--forum-bg-dark) !important;
+}
+
+.dark .dark\:bg-\[\#100e18\] {
+  background-color: var(--forum-nav-dark) !important;
+}
+
+.dark .dark\:bg-\[\#100e18\]\/90 {
+  background-color: color-mix(in srgb, var(--forum-nav-dark) 90%, transparent) !important;
+}
+
+.dark .dark\:bg-\[\#13111c\] {
+  background-color: var(--forum-surface-dark) !important;
+}
+
+.dark .dark\:bg-\[\#1a1726\],
+.dark .dark\:bg-\[\#181524\],
+.dark .dark\:bg-\[\#191625\],
+.dark .dark\:bg-\[\#1b1828\],
+.dark .dark\:bg-\[\#1c1829\] {
+  background-color: var(--forum-elevated-dark) !important;
+}
+
+/* ===========================================================================
+   Bewegende achtergrond - custom "creative forge" WebGL shader
+   Warme goud/cyaan palet op diep indigo — voor een maker community.
+   Reageert op thema-kleuren (--forum-accent, --forum-accent-2).
+   =========================================================================== */
+
+.forum-aurora {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  /* Fallback gradient while WebGL loads — light mode */
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--forum-accent) 8%, #fefce8) 0%,
+    #fefce8 50%,
+    color-mix(in srgb, var(--forum-accent-2) 6%, #fefce8) 100%
+  );
+}
+
+.dark .forum-aurora {
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--forum-accent) 12%, var(--forum-bg-dark)) 0%,
+    var(--forum-bg-dark) 50%,
+    color-mix(in srgb, var(--forum-accent-2) 8%, var(--forum-bg-dark)) 100%
+  );
+}
+
+/* Subtle film grain overlay */
+.forum-aurora::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.dark .forum-aurora::after {
+  opacity: 0.05;
+}
+
+/* Subtle animated aurora rings — CSS fallback for reduced motion / no WebGL */
+@media (prefers-reduced-motion: no-preference) {
+  .forum-aurora::before {
+    content: '';
+    position: absolute;
+    inset: -20%;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 30%, color-mix(in srgb, var(--forum-accent) 15%, transparent), transparent),
+      radial-gradient(ellipse 50% 50% at 80% 70%, color-mix(in srgb, var(--forum-accent-2) 12%, transparent), transparent),
+      radial-gradient(ellipse 40% 60% at 50% 50%, color-mix(in srgb, var(--forum-accent) 8%, var(--forum-accent-2) 8%, transparent), transparent);
+    animation: forgeAuroraShift 20s ease-in-out infinite alternate;
+    pointer-events: none;
+    opacity: 0.4;
+  }
+}
+
+@keyframes forgeAuroraShift {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 0.3; }
+  25% { transform: translate(-3%, 2%) scale(1.05) rotate(1deg); opacity: 0.45; }
+  50% { transform: translate(2%, -1%) scale(0.98) rotate(-0.5deg); opacity: 0.35; }
+  75% { transform: translate(-1%, -3%) scale(1.02) rotate(0.5deg); opacity: 0.4; }
+  100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 0.3; }
+}
+
+/* WebGL canvas fills the aurora container */
+.forum-aurora__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Kaarten: dicht en rustig, met een iets duidelijkere rand en een kleine schaduw */
+.dark .dark\:bg-\[\#13111c\] {
+  background-color: var(--forum-surface-dark) !important;
+}
+
+section.rounded-2xl,
+div.rounded-2xl {
+  box-shadow: 0 1px 2px rgba(15, 12, 24, 0.06);
+}
+
+.dark section.rounded-2xl,
+.dark div.rounded-2xl {
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+/* ===========================================================================
+   Soepele kliks & mobiel
+   =========================================================================== */
+
+html {
+  /* geen blauwe/grijze flits bij tikken op mobiel */
+  -webkit-tap-highlight-color: transparent;
+  /* nooit zijwaarts kunnen schuiven door een te breed element */
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: clip;
+}
+
+/* Invoervelden mogen in een rij krimpen (anders duwen ze knoppen buiten beeld) */
+input,
+textarea,
+select {
+  min-width: 0;
+}
+
+/* geen 300ms tik-vertraging en geen dubbel-tik-zoom op knoppen */
+button,
+a,
+[role='button'],
+summary,
+label,
+select,
+input[type='checkbox'],
+input[type='radio'] {
+  touch-action: manipulation;
+}
+
+/* Indrukeffect: knoppen geven direct mee als je klikt of tikt */
+button,
+a[href],
+[role='button'] {
+  transition-property: background-color, border-color, color, fill, stroke, box-shadow, opacity, scale, translate;
+  transition-duration: 160ms;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+button:not(:disabled):active,
+a[href]:active,
+[role='button']:active {
+  scale: 0.96;
+  transition-duration: 70ms;
+}
+
+/* Brede klikbare kaarten (topics, nieuws) minder ver indrukken */
+button.w-full:not(:disabled):active,
+button.text-left:not(:disabled):active,
+a.block:active {
+  scale: 0.985;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* Duidelijke focusring voor toetsenbordgebruikers, niet bij klikken */
+:where(button, a, [role='button'], input, select, textarea):focus-visible {
+  outline: 2px solid var(--forum-accent);
+  outline-offset: 2px;
+}
+
+/* Paginawissel: korte fade in plaats van een harde sprong */
+@keyframes forumPageEnter {
+  from { opacity: 0; translate: 0 6px; }
+  to   { opacity: 1; translate: 0 0; }
+}
+
+.forum-page-enter {
+  animation: forumPageEnter 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Vensters (topic, inloggen, nieuws, ...): zacht openen */
+@keyframes forumOverlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes forumModalIn {
+  from { opacity: 0; scale: 0.97; translate: 0 8px; }
+  to   { opacity: 1; scale: 1; translate: 0 0; }
+}
+
+@keyframes forumSheetUp {
+  from { translate: 0 100%; }
+  to   { translate: 0 0; }
+}
+
+.forum-modal-overlay {
+  animation: forumOverlayIn 160ms ease-out both;
+  overscroll-behavior: contain;
+}
+
+.forum-modal-overlay > * {
+  animation: forumModalIn 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Op de telefoon: vensters schuiven als 'sheet' van onderen omhoog */
+@media (max-width: 639px) {
+  .forum-modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .forum-modal-overlay > * {
+    width: 100%;
+    max-width: 100% !important;
+    max-height: 92dvh !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-bottom-width: 0 !important;
+    padding-bottom: env(safe-area-inset-bottom);
+    animation: forumSheetUp 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* Op touch iets ruimere tikvlakken voor kleine knopjes */
+  .forum-modal-overlay button[aria-label='Sluiten'] {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+
+@media (pointer: coarse) {
+  /* inputs op iOS niet laten inzoomen: minimaal 16px tekst */
+  input:not([type='checkbox']):not([type='radio']):not([type='range']),
+  textarea,
+  select {
+    font-size: max(16px, 1em);
+  }
+}
+
+@keyframes newsFadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.news-card-enter {
+  animation: newsFadeSlideIn 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root,
+  body,
+  aside,
+  header,
+  nav,
+  main,
+  section,
+  article,
+  footer,
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  label,
+  span,
+  div[class*="rounded-"],
+  div[class*="border-"],
+  div[class*="bg-"],
+  .forum-card-glow,
+  .forum-hero-glow {
+    transition: none !important;
+  }
+
+  .news-card-enter {
+    animation: none;
+  }
+
+  .forum-aurora__blob,
+  .forum-page-enter,
+  .forum-modal-overlay,
+  .forum-modal-overlay > * {
+    animation: none !important;
+  }
+
+  button:active,
+  a[href]:active,
+  [role='button']:active {
+    scale: 1 !important;
+  }
+}
+
+
+/* ---------- bewegende gloed in het 'Word lid!'-blok ---------- */
+.forum-card-glow--moving {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background-image: none;
+}
+.forum-card-glow--moving > * {
+  position: relative;
+  z-index: 1;
+}
+.forum-card-glow--moving::before,
+.forum-card-glow--moving::after {
+  content: '';
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform;
+}
+.forum-card-glow--moving::before {
+  width: 260px;
+  height: 260px;
+  right: -90px;
+  bottom: -110px;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--forum-accent) 55%, transparent), transparent);
+  animation: forumDriftA 14s ease-in-out infinite alternate;
+}
+.forum-card-glow--moving::after {
+  width: 200px;
+  height: 200px;
+  left: -70px;
+  top: -90px;
+  background: radial-gradient(closest-side, rgba(232, 179, 83, 0.28), transparent);
+  animation: forumDriftB 18s ease-in-out infinite alternate;
+}
+@keyframes forumDriftA {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-120px, -50px) scale(1.25); }
+  100% { transform: translate(-40px, -120px) scale(0.95); }
+}
+@keyframes forumDriftB {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(110px, 60px) scale(1.2); }
+  100% { transform: translate(40px, 120px) scale(1); }
+}
+
+/* ---------- glanzende badges (Oprichter, Admin, Moderator, Lid #001, Bouwer) ---------- */
+.badge-shine {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  color: var(--shine-ink) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  background-color: var(--shine-2) !important;
+  background-image: linear-gradient(135deg, var(--shine-1), var(--shine-2));
+  box-shadow: 0 4px 12px -6px var(--shine-2);
+}
+.badge-shine::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.6) 50%, transparent 65%);
+  transform: translateX(-130%);
+  animation: badgeSheen 5s ease-in-out infinite;
+}
+.badge-shine--founder   { --shine-1: #ffe38f; --shine-2: #e08a00; --shine-ink: #3a2300; }
+.badge-shine--admin     { --shine-1: #a98cff; --shine-2: #5426d6; --shine-ink: #ffffff; }
+.badge-shine--moderator { --shine-1: #7cc4ff; --shine-2: #1d5fd1; --shine-ink: #ffffff; }
+.badge-shine--first     { --shine-1: #2cc4d6; --shine-2: #0a5c76; --shine-ink: #ffffff; }
+.badge-shine--builder   { --shine-1: #ff6fae; --shine-2: #e3500c; --shine-ink: #ffffff; }
+.badge-shine--admin::after     { animation-delay: 0.6s; }
+.badge-shine--moderator::after { animation-delay: 0.9s; }
+.badge-shine--first::after     { animation-delay: 1.2s; }
+.badge-shine--builder::after   { animation-delay: 1.8s; }
+@keyframes badgeSheen {
+  0%, 70% { transform: translateX(-130%); }
+  100% { transform: translateX(130%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .forum-card-glow--moving::before,
+  .forum-card-glow--moving::after {
+    animation: none;
+  }
+  .badge-shine::after {
+    display: none;
+  }
+}
+
+/* ===========================================================================
+   Klassieke forum board-index (ForumIndex.tsx / ForumSidebar.tsx / Breadcrumbs.tsx):
+   herbouwd nadat deze styling bij het terugschrijven per ongeluk overschreven was.
+   =========================================================================== */
+.forum-page {
+  background: var(--forum-bg-dark);
+  color: #ededee;
+}
+
+.forum-breadcrumbs {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 1rem clamp(1rem, 3vw, 1.5rem) 0;
+}
+
+.forum-index-hero {
+  max-width: 80rem;
+  margin: 0 auto 1.5rem;
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1fr);
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border-radius: 1rem;
+  background: linear-gradient(160deg, var(--forum-nav-dark) 0%, var(--forum-surface-dark) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  position: relative;
+  overflow: hidden;
+}
+@media (min-width: 900px) {
+  .forum-index-hero {
+    grid-template-columns: minmax(0, 1fr) 260px;
+  }
+}
+.forum-index-hero__copy h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #fff;
+  line-height: 1.1;
+  margin: 0.5rem 0 0.75rem;
+}
+.forum-index-hero__copy h1 em {
+  font-style: normal;
+  color: var(--forum-accent);
+}
+.forum-index-hero__copy p {
+  color: #a8a2bd;
+  max-width: 48ch;
+  margin: 0 0 1.25rem;
+}
+.forum-index-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-board-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--forum-accent);
+}
+.forum-hero-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.6rem 1.1rem;
+  border-radius: 0.75rem;
+  background: var(--forum-accent);
+  color: #0c0d10;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+.forum-hero-button:hover {
+  background: var(--forum-accent-hover);
+}
+.forum-hero-aside {
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  padding-left: clamp(1rem, 3vw, 1.5rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: relative;
+}
+.forum-hero-index {
+  font-family: var(--font-board-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: #8e8e93;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.forum-live-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: #c9c4db;
+}
+.forum-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4cd9a0;
+  box-shadow: 0 0 0 3px rgba(76, 217, 160, 0.2);
+}
+.forum-hero-aside p {
+  font-family: var(--font-board-display);
+  font-weight: 700;
+  color: #fff;
+  font-size: 1.1rem;
+  line-height: 1.3;
+  margin: 0;
+}
+.forum-hero-mark {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0;
+  font-size: 2.5rem;
+  color: rgba(255, 255, 255, 0.08);
+}
+
+.forum-index-section-label {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 3vw, 1.5rem);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-family: var(--font-board-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: #716b88;
+  margin-bottom: 0.75rem;
+}
+.forum-index-section-label span:last-child {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+
+.forum-category-section {
+  background: var(--forum-surface-dark);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 0.875rem;
+  overflow: hidden;
+}
+.forum-category-header {
+  padding: 0.85rem 1.1rem;
+  background: var(--forum-elevated-dark);
+  font-weight: 700;
+  color: #fff;
+}
+.forum-category-icon {
+  color: var(--forum-accent);
+}
+.forum-category-count {
+  margin-left: auto;
+  font-family: var(--font-board-mono);
+  font-size: 11px;
+  color: #8e8e93;
+}
+
+.forum-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.forum-table thead th {
+  text-align: left;
+  font-family: var(--font-board-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #716b88;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.forum-table .col-replies,
+.forum-table .col-views {
+  text-align: center;
+  width: 90px;
+}
+.forum-table .col-lastpost {
+  width: 230px;
+}
+.forum-table tbody tr {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background-color 150ms;
+}
+.forum-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+.forum-table td {
+  padding: 0.85rem 1rem;
+  vertical-align: top;
+}
+.thread-title {
+  font-weight: 600;
+  color: #fff;
+}
+.thread-title:hover {
+  color: var(--forum-accent);
+}
+.thread-meta {
+  color: #8e8e93;
+  font-size: 0.8rem;
+  margin: 2px 0 0;
+}
+.lastpost-info {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.8rem;
+}
+.lastpost-time {
+  color: #8e8e93;
+}
+.forum-lastpost-arrow {
+  position: absolute;
+  right: 0;
+  top: 0;
+  color: #716b88;
+}
+
+.forum-sidebar {
+  background: var(--forum-surface-dark);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 0.875rem;
+  padding: 1.1rem;
+}
+.forum-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+.forum-stat-card {
+  background: var(--forum-elevated-dark);
+  border-radius: 0.6rem;
+  padding: 0.65rem 0.75rem;
+  text-align: center;
+}
+.forum-stat-value {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: #fff;
+}
+.forum-stat-label {
+  font-size: 0.7rem;
+  color: #8e8e93;
+}
+.forum-sidebar-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #c9c4db;
+  margin-bottom: 0.6rem;
+}
+.forum-sidebar-item {
+  font-size: 0.85rem;
+}

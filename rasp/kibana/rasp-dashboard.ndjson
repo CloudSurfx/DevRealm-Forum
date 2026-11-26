@@ -1,0 +1,56 @@
+{
+  "version": "8.11.0",
+  "objects": [
+    {
+      "id": "rasp-overview-dashboard",
+      "type": "dashboard",
+      "attributes": {
+        "title": "RASP Security Overview",
+        "description": "Runtime Application Self-Protection monitoring dashboard",
+        "panelsJSON": "[{\"version\":\"8.11.0\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"panel-1\"},{\"version\":\"8.11.0\",\"gridData\":{\"x\":24,\"y\":0,\"w\":24,\"h\":15,\"i\":\"panel-2\"},{\"version\":\"8.11.0\",\"gridData\":{\"x\":0,\"y\":15,\"w\":48,\"h\":20,\"i\":\"panel-3\"}}]",
+        "timeRestore": true,
+        "query": "",
+        "options": {
+          "hidePanelTitles": false,
+          "useMargins": true,
+          "syncColors": true
+        }
+      },
+      "references": [
+        {"name": "panel-1", "type": "visualization", "id": "rasp-attacks-by-type"},
+        {"name": "panel-2", "type": "visualization", "id": "rasp-block-rate"},
+        {"name": "panel-3", "type": "visualization", "id": "rasp-top-attackers"}
+      ]
+    },
+    {
+      "id": "rasp-attacks-by-type",
+      "type": "visualization",
+      "attributes": {
+        "title": "Attacks by Type",
+        "visState": "{\"title\":\"Attacks by Type\",\"type\":\"pie\",\"params\":{\"addLegend\":true,\"addTooltip\":true,\"categoryAxes\":{\"show\":true},\"valueAxes\":[{\"show\":true}],\"seriesParams\":[{\"show\":true,\"type\":\"pie\",\"mode\":\"angle\",\"valueAxis\":1,\"drawLinesBetweenPoints\":true,\"showCircles\":true}],\"addTimeMarker\":false},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"attack_type\",\"size\":10,\"order\":\"desc\",\"orderBy\":\"1\"}}],\"listeners\":{}}",
+        "uiStateJSON": "{}",
+        "description": "Distribution of attack types detected by RASP"
+      }
+    },
+    {
+      "id": "rasp-block-rate",
+      "type": "visualization",
+      "attributes": {
+        "title": "Block vs Log Rate",
+        "visState": "{\"title\":\"Block vs Log Rate\",\"type\":\"pie\",\"params\":{\"addLegend\":true,\"addTooltip\":true},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"action_taken\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\"}}],\"listeners\":{}}",
+        "uiStateJSON": "{}",
+        "description": "Ratio of blocked vs logged attacks"
+      }
+    },
+    {
+      "id": "rasp-top-attackers",
+      "type": "visualization",
+      "attributes": {
+        "title": "Top Attack Sources",
+        "visState": "{\"title\":\"Top Attack Sources\",\"type\":\"table\",\"params\":{\"perPage\":10,\"showPartialRows\":false,\"showMeticsAtAllLevels\":false,\"sort\":{\"columnIndex\":null,\"direction\":null},\"totalFunc\":\"sum\"},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"schema\":\"metric\",\"params\":{}},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"client_ip\",\"size\":10,\"order\":\"desc\",\"orderBy\":\"1\"}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"bucket\",\"params\":{\"field\":\"attack_type\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"1\"}}],\"listeners\":{}}",
+        "uiStateJSON": "{}",
+        "description": "Top attacking IP addresses with attack breakdown"
+      }
+    }
+  ]
+}
